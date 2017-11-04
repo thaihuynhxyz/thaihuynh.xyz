@@ -11,7 +11,7 @@
 #include "util/dbg.h"
 #include "util/HMap.h"
 
-#define PORT 8080
+#define PORT 80
 #define POST_BUFFER_SIZE  1024
 
 URLRouter *router;
@@ -182,8 +182,14 @@ int main() {
         flag = MHD_USE_POLL_INTERNALLY;
     else
         flag*/ = MHD_USE_SELECT_INTERNALLY;
+
+#ifdef NDEBUG
     daemon = MHD_start_daemon(flag, PORT, NULL, NULL, &on_handle_connection, NULL,
                               MHD_OPTION_NOTIFY_COMPLETED, on_handle_complete, NULL, MHD_OPTION_END);
+#else
+    daemon = MHD_start_daemon(flag, 8080, NULL, NULL, &on_handle_connection, NULL,
+                              MHD_OPTION_NOTIFY_COMPLETED, on_handle_complete, NULL, MHD_OPTION_END);
+#endif
     check_mem(daemon);
 
     // router direct url to services
