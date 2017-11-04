@@ -11,7 +11,7 @@
 #include "util/dbg.h"
 #include "util/HMap.h"
 
-#define PORT 80
+#define PORT 8080
 #define POST_BUFFER_SIZE  1024
 
 URLRouter *router;
@@ -118,6 +118,7 @@ static int on_handle_connection(void *cls,
         } else if (!strcmp(method, MHD_HTTP_METHOD_GET)) {
             con_info->connection_type = GET;
             con_info->get_connection = connection;
+            con_info->body = NULL;
             MHD_get_connection_values(connection, MHD_HEADER_KIND, iterate_header, (void *) con_info);
             MHD_get_connection_values(connection, MHD_GET_ARGUMENT_KIND, iterate_get, (void *) con_info);
         }
