@@ -196,7 +196,7 @@ int main() {
     router = URLRouter_create();
 
     // wait for any key press to exit
-    (void) getchar();
+    while(getchar() != 'q');
 
     error:
     exit_nicely(daemon);

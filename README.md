@@ -1,4 +1,4 @@
-# [thaihuynh.xyz]()
+# [thaihuynh.xyz](http://thaihuynh.xyz)
 
 ### Peronal website ###
 
