@@ -174,13 +174,13 @@ int main() {
     // start micro HTTP daemon (MHD). when a request coming, we will handle it in #on_handle_connection
     struct MHD_Daemon *daemon;
 
-    unsigned int flag;
+    unsigned int flag/*;
     if (MHD_is_feature_supported(MHD_FEATURE_EPOLL))
         flag = MHD_USE_EPOLL_INTERNALLY_LINUX_ONLY;
     else if (MHD_is_feature_supported(MHD_FEATURE_POLL))
         flag = MHD_USE_POLL_INTERNALLY;
     else
-        flag = MHD_USE_SELECT_INTERNALLY;
+        flag*/ = MHD_USE_SELECT_INTERNALLY;
     daemon = MHD_start_daemon(flag, PORT, NULL, NULL, &on_handle_connection, NULL,
                               MHD_OPTION_NOTIFY_COMPLETED, on_handle_complete, NULL, MHD_OPTION_END);
     check_mem(daemon);

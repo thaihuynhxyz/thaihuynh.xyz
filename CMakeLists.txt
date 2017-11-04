@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(thaihuynh_xyz)
 
+set(CMAKE_C_STANDARD 99)
+
 # link library
 link_directories(/usr/lib/x86_64-linux-gnu/)
 
