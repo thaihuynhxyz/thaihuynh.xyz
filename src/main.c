@@ -11,7 +11,7 @@
 #include "util/dbg.h"
 #include "util/HMap.h"
 
-#define PORT 8080
+#define PORT 80
 #define POST_BUFFER_SIZE  1024
 
 URLRouter *router;
