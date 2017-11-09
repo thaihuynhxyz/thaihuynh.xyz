@@ -228,13 +228,16 @@ int main() {
     else
         flag*/ = MHD_USE_SELECT_INTERNALLY;
 
+    int port;
 #ifdef NDEBUG
-    daemon = MHD_start_daemon(flag, PORT, NULL, NULL, &on_handle_connection, NULL,
-                              MHD_OPTION_NOTIFY_COMPLETED, on_handle_complete, NULL, MHD_OPTION_END);
+    port = PORT
 #else
-    daemon = MHD_start_daemon(flag, 8080, NULL, NULL, &on_handle_connection, NULL,
-                              MHD_OPTION_NOTIFY_COMPLETED, on_handle_complete, NULL, MHD_OPTION_END);
+    port = 8080;
 #endif
+    log_info("start on port: %d\n", port);
+
+    daemon = MHD_start_daemon(flag, port, NULL, NULL, &on_handle_connection, NULL,
+                              MHD_OPTION_NOTIFY_COMPLETED, on_handle_complete, NULL, MHD_OPTION_END);
     check_mem(daemon);
 
     // router direct url to services
