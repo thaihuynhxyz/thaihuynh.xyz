@@ -230,7 +230,7 @@ int main() {
 
     int port;
 #ifdef NDEBUG
-    port = PORT
+    port = PORT;
 #else
     port = 8080;
 #endif
