@@ -13,7 +13,7 @@
 
 #define PORT 80
 #define POST_BUFFER_SIZE  1024
-#define PORTFOLIO_PATH "res/mdl-template-portfolio"
+#define PORTFOLIO_PATH "/res/mdl-template-portfolio"
 
 URLRouter *router;
 
@@ -149,10 +149,11 @@ static int on_handle_connection(void *cls,
         FILE *file;
         struct stat buf;
 
-        char *path = malloc(strlen(PORTFOLIO_PATH) + strlen(url) + 1);
-        strcpy(path, PORTFOLIO_PATH);
+        char *current_dir = get_current_dir();
+        char *path = malloc(strlen(current_dir) + strlen(PORTFOLIO_PATH) + strlen(url) + 1);
+        strcpy(path, current_dir);
+        strcat(path, PORTFOLIO_PATH);
         strcat(path, url);
-        log_info("Current dir = %s\n", path);
 
         if ((0 == stat(path, &buf)) && (S_ISREG (buf.st_mode))) {
             file = fopen(path, "rb");

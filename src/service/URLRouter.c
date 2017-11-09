@@ -1,9 +1,11 @@
 #include <model/http_result.h>
 #include <microhttpd.h>
+#include <util/util.h>
 
 #include "URLRouter.h"
 
 #define API "/"
+#define ABOUT "/res/mdl-template-portfolio/about.html"
 
 struct http_result *Api_handle_get() {
     log_info("func %s - conn", __func__);
@@ -12,8 +14,14 @@ struct http_result *Api_handle_get() {
     char *buffer = NULL;
     size_t size = 0;
 
+    char *current_dir = get_current_dir();
+    char *path = malloc(strlen(current_dir) + strlen(ABOUT) + 1);
+    strcpy(path, current_dir);
+    strcat(path, ABOUT);
+
     /* Open your_file in read-only mode */
-    FILE *fp = fopen("res/mdl-template-portfolio/about.html", "r");
+    FILE *fp = fopen(path, "r");
+    free(path);
 
     /* Get the buffer size */
     fseek(fp, 0, SEEK_END); /* Go to end of file */
