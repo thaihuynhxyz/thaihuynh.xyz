@@ -5,16 +5,39 @@
 
 #define API "/"
 
-struct http_result *Api_handle_get(struct connection_info *info) {
+struct http_result *Api_handle_get() {
     log_info("func %s - conn", __func__);
     struct http_result *result = malloc(sizeof(struct http_result));
     result->http_code = MHD_HTTP_OK;
-    result->message = "<html><body>Hi, my name is Thai Huynh!</body></html>";
+    char *buffer = NULL;
+    size_t size = 0;
+
+    /* Open your_file in read-only mode */
+    FILE *fp = fopen("res/mdl-template-portfolio/about.html", "r");
+
+    /* Get the buffer size */
+    fseek(fp, 0, SEEK_END); /* Go to end of file */
+    size = (size_t) ftell(fp); /* How many bytes did we pass ? */
+
+    /* Set position of stream to the beginning */
+    rewind(fp);
+
+    /* Allocate the buffer (no need to initialize it with calloc) */
+    buffer = malloc((size + 1) * sizeof(*buffer)); /* size + 1 byte for the \0 */
+
+    /* Read the file into the buffer */
+    fread(buffer, size, 1, fp); /* Read 1 chunk of size bytes from fp into buffer */
+
+    /* NULL-terminate the buffer */
+    buffer[size] = '\0';
+
+    result->message = buffer;
+
     return result;
 }
 
 struct http_result *Api_handle(struct connection_info *info) {
-    if (info->connection_type == GET) return Api_handle_get(info);
+    if (info->connection_type == GET) return Api_handle_get();
 
     struct http_result *result = malloc(sizeof(struct http_result));
     result->http_code = MHD_HTTP_METHOD_NOT_ALLOWED;
@@ -44,7 +67,7 @@ struct http_result *URLRouter_route(URLRouter *self, const char *url, struct con
     if (handler) return handler(info);
 
     struct http_result *result = malloc(sizeof(struct http_result));
-    result->http_code = MHD_HTTP_SERVICE_UNAVAILABLE;
-    result->message = "service unavailable";
+    result->http_code = MHD_HTTP_FORBIDDEN;
+    result->message = "Forbidden";
     return result;
 }

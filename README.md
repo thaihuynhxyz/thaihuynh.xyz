@@ -1,17 +1,20 @@
-# [thaihuynh.xyz](http://thaihuynh.xyz)
+# [thaihuynh.xyz](http://thaihuynh.xyz/about.html)
 
 ### Peronal website ###
 
 * Implement personal website by [GNU Libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
-* Version 1.0.0
+* Use [Material Design Lite](https://github.com/google/material-design-lite)'s [templates](https://getmdl.io/templates/index.html)
+* Version 1.1.0
 
 ### Set up ###
 
 * Summary of set up
 
-        git clone https://github.com/thaihuynhxyz/thaihuynh.xyz.git
-        cd thaihuynh.xyz
-
+    * Clone the repository
+    
+            $ git clone https://github.com/thaihuynhxyz/thaihuynh.xyz.git
+            $ cd thaihuynh.xyz
+    
 * Configuration
 
     Build by [CMake](https://cmake.org/)
@@ -21,7 +24,7 @@
         cmake ..
         make -j4
         
-    Suggest use [Clion](https://www.jetbrains.com/clion/)
+    Suggest use [CLion](https://www.jetbrains.com/clion/)
     
 * Dependencies
 

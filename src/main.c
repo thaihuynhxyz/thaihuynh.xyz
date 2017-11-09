@@ -5,14 +5,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <model/http_result.h>
+#include <sys/stat.h>
+#include <util/util.h>
 
 #include "model/connection_info.h"
 #include "service/URLRouter.h"
-#include "util/dbg.h"
-#include "util/HMap.h"
 
 #define PORT 80
 #define POST_BUFFER_SIZE  1024
+#define PORTFOLIO_PATH "res/mdl-template-portfolio"
 
 URLRouter *router;
 
@@ -92,6 +93,18 @@ static void on_handle_complete(void *cls,
     }
 }
 
+static ssize_t file_reader(void *cls, uint64_t pos, char *buf, size_t max) {
+    FILE *file = cls;
+
+    (void) fseek(file, pos, SEEK_SET);
+    return fread(buf, 1, max, file);
+}
+
+static void file_free_callback(void *cls) {
+    FILE *file = cls;
+    fclose(file);
+}
+
 static int on_handle_connection(void *cls,
                                 struct MHD_Connection *connection,
                                 const char *url,
@@ -132,11 +145,42 @@ static int on_handle_connection(void *cls,
 
     con_info = *con_cls;
     if (!strcmp(method, MHD_HTTP_METHOD_GET)) {    // handle GET method
-        con_info->result = URLRouter_route(router, url, con_info);
-        response = MHD_create_response_from_buffer(strlen(con_info->result->message),
-                                                   (void *) con_info->result->message, MHD_RESPMEM_PERSISTENT);
-        ret = MHD_queue_response(connection, con_info->result->http_code, response);
-        MHD_destroy_response(response);
+
+        FILE *file;
+        struct stat buf;
+
+        char *path = malloc(strlen(PORTFOLIO_PATH) + strlen(url) + 1);
+        strcpy(path, PORTFOLIO_PATH);
+        strcat(path, url);
+        log_info("Current dir = %s\n", path);
+
+        if ((0 == stat(path, &buf)) && (S_ISREG (buf.st_mode))) {
+            file = fopen(path, "rb");
+        } else {
+            file = NULL;
+        }
+
+        free(path);
+
+        if (file == NULL) {
+            con_info->result = URLRouter_route(router, url, con_info);
+            response = MHD_create_response_from_buffer(strlen(con_info->result->message),
+                                                       (void *) con_info->result->message, MHD_RESPMEM_PERSISTENT);
+            ret = MHD_queue_response(connection, con_info->result->http_code, response);
+            MHD_destroy_response(response);
+        } else {
+            response = MHD_create_response_from_callback((uint64_t) buf.st_size,
+                                                         32 * 1024,     /* 32k PAGE_NOT_FOUND size */
+                                                         &file_reader, file,
+                                                         &file_free_callback);
+            con_info->result = NULL;
+            if (response == NULL) {
+                fclose(file);
+                return MHD_NO;
+            }
+            ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+            MHD_destroy_response(response);
+        }
         return ret;
     }
     if (!strcmp(method, MHD_HTTP_METHOD_POST)) {   // handle POST method
@@ -196,7 +240,7 @@ int main() {
     router = URLRouter_create();
 
     // wait for any key press to exit
-    while(getchar() != 'q');
+    while (getchar() != 'q');
 
     error:
     exit_nicely(daemon);
