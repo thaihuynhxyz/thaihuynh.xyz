@@ -5,7 +5,7 @@
 #include "URLRouter.h"
 
 #define API "/"
-#define ABOUT "/res/mdl-template-portfolio/about.html"
+#define ABOUT "/res/index.html"
 
 struct http_result *Api_handle_get() {
     log_info("func %s - conn", __func__);
