@@ -13,7 +13,7 @@
 
 #define PORT 80
 #define POST_BUFFER_SIZE  1024
-#define PORTFOLIO_PATH "/res/mdl-template-portfolio"
+#define PORTFOLIO_PATH "/res"
 
 URLRouter *router;
 
