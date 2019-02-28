@@ -5,14 +5,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <model/http_result.h>
+#include <sys/stat.h>
+#include <util/util.h>
 
 #include "model/connection_info.h"
 #include "service/URLRouter.h"
-#include "util/dbg.h"
-#include "util/HMap.h"
 
 #define PORT 80
 #define POST_BUFFER_SIZE  1024
+#define RES_PATH "/res"
 
 URLRouter *router;
 
@@ -92,6 +93,18 @@ static void on_handle_complete(void *cls,
     }
 }
 
+static ssize_t file_reader(void *cls, uint64_t pos, char *buf, size_t max) {
+    FILE *file = cls;
+
+    (void) fseek(file, (long) pos, SEEK_SET);
+    return fread(buf, 1, max, file);
+}
+
+static void file_free_callback(void *cls) {
+    FILE *file = cls;
+    fclose(file);
+}
+
 static int on_handle_connection(void *cls,
                                 struct MHD_Connection *connection,
                                 const char *url,
@@ -132,11 +145,43 @@ static int on_handle_connection(void *cls,
 
     con_info = *con_cls;
     if (!strcmp(method, MHD_HTTP_METHOD_GET)) {    // handle GET method
-        con_info->result = URLRouter_route(router, url, con_info);
-        response = MHD_create_response_from_buffer(strlen(con_info->result->message),
-                                                   (void *) con_info->result->message, MHD_RESPMEM_PERSISTENT);
-        ret = MHD_queue_response(connection, con_info->result->http_code, response);
-        MHD_destroy_response(response);
+
+        FILE *file;
+        struct stat buf;
+
+        char *current_dir = get_current_dir();
+        char *path = malloc(strlen(current_dir) + strlen(RES_PATH) + strlen(url) + 1);
+        strcpy(path, current_dir);
+        strcat(path, RES_PATH);
+        strcat(path, url);
+
+        if ((0 == stat(path, &buf)) && (S_ISREG (buf.st_mode))) {
+            file = fopen(path, "rb");
+        } else {
+            file = NULL;
+        }
+
+        free(path);
+
+        if (file == NULL) {
+            con_info->result = URLRouter_route(router, url, con_info);
+            response = MHD_create_response_from_buffer(strlen(con_info->result->message),
+                                                       (void *) con_info->result->message, MHD_RESPMEM_PERSISTENT);
+            ret = MHD_queue_response(connection, con_info->result->http_code, response);
+            MHD_destroy_response(response);
+        } else {
+            response = MHD_create_response_from_callback((uint64_t) buf.st_size,
+                                                         32 * 1024,     /* 32k PAGE_NOT_FOUND size */
+                                                         &file_reader, file,
+                                                         &file_free_callback);
+            con_info->result = NULL;
+            if (response == NULL) {
+                fclose(file);
+                return MHD_NO;
+            }
+            ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+            MHD_destroy_response(response);
+        }
         return ret;
     }
     if (!strcmp(method, MHD_HTTP_METHOD_POST)) {   // handle POST method
@@ -175,28 +220,25 @@ int main() {
     // start micro HTTP daemon (MHD). when a request coming, we will handle it in #on_handle_connection
     struct MHD_Daemon *daemon;
 
-    unsigned int flag/*;
-    if (MHD_is_feature_supported(MHD_FEATURE_EPOLL))
-        flag = MHD_USE_EPOLL_INTERNALLY_LINUX_ONLY;
-    else if (MHD_is_feature_supported(MHD_FEATURE_POLL))
-        flag = MHD_USE_POLL_INTERNALLY;
-    else
-        flag*/ = MHD_USE_SELECT_INTERNALLY;
+    const unsigned int flag = MHD_USE_SELECT_INTERNALLY;
 
+    uint16_t port;
 #ifdef NDEBUG
-    daemon = MHD_start_daemon(flag, PORT, NULL, NULL, &on_handle_connection, NULL,
-                              MHD_OPTION_NOTIFY_COMPLETED, on_handle_complete, NULL, MHD_OPTION_END);
+    port = PORT;
 #else
-    daemon = MHD_start_daemon(flag, 8080, NULL, NULL, &on_handle_connection, NULL,
-                              MHD_OPTION_NOTIFY_COMPLETED, on_handle_complete, NULL, MHD_OPTION_END);
+    port = 8080;
 #endif
+    log_info("start on port: %d\n", port);
+
+    daemon = MHD_start_daemon(flag, port, NULL, NULL, &on_handle_connection, NULL,
+                              MHD_OPTION_NOTIFY_COMPLETED, on_handle_complete, NULL, MHD_OPTION_END);
     check_mem(daemon);
 
     // router direct url to services
     router = URLRouter_create();
 
     // wait for any key press to exit
-    while(getchar() != 'q');
+    while (getchar() != 'q');
 
     error:
     exit_nicely(daemon);

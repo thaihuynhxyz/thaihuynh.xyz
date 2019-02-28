@@ -16,14 +16,16 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/util/ UTIL_SOURCE_FILES)
 aux_source_directory(src/service/ SERVICE_SOURCE_FILES)
 
 # link resource
-#add_custom_target(
-#        ${PROJECT_NAME}_res ALL
-#        ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/res ${CMAKE_CURRENT_BINARY_DIR}/res
-#        SOURCES ${${PROJECT_NAME}_res}
-#)
+add_custom_target(
+        ${PROJECT_NAME}_res ALL
+        ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/res ${CMAKE_BINARY_DIR}/res
+        SOURCES ${${PROJECT_NAME}_res}
+)
 
 add_executable(${PROJECT_NAME} ${MAIN_SOURCE_FILES}
         ${UTIL_SOURCE_FILES}
         ${SERVICE_SOURCE_FILES})
+
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_res)
 
 target_link_libraries(${PROJECT_NAME} microhttpd)
