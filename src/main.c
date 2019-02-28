@@ -220,13 +220,7 @@ int main() {
     // start micro HTTP daemon (MHD). when a request coming, we will handle it in #on_handle_connection
     struct MHD_Daemon *daemon;
 
-    unsigned int flag;
-    if (MHD_is_feature_supported(MHD_FEATURE_EPOLL))
-        flag = MHD_USE_EPOLL_INTERNALLY_LINUX_ONLY;
-    else if (MHD_is_feature_supported(MHD_FEATURE_POLL))
-        flag = MHD_USE_POLL_INTERNALLY;
-    else
-        flag = MHD_USE_SELECT_INTERNALLY;
+    const unsigned int flag = MHD_USE_SELECT_INTERNALLY;
 
     uint16_t port;
 #ifdef NDEBUG
