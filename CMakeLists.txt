@@ -26,4 +26,6 @@ add_executable(${PROJECT_NAME} ${MAIN_SOURCE_FILES}
         ${UTIL_SOURCE_FILES}
         ${SERVICE_SOURCE_FILES})
 
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_res)
+
 target_link_libraries(${PROJECT_NAME} microhttpd)

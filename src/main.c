@@ -13,7 +13,7 @@
 
 #define PORT 80
 #define POST_BUFFER_SIZE  1024
-#define PORTFOLIO_PATH "/res"
+#define RES_PATH "/res"
 
 URLRouter *router;
 
@@ -34,13 +34,13 @@ static void exit_nicely(struct MHD_Daemon *daemon) {
  * @params size: size of data
  */
 static int iterate_post(void *info_cls,
-                        enum MHD_ValueKind kind,
+                        __unused enum MHD_ValueKind kind,
                         const char *key,
-                        const char *filename,
-                        const char *content_type,
-                        const char *transfer_encoding,
+                        __unused const char *filename,
+                        __unused const char *content_type,
+                        __unused const char *transfer_encoding,
                         const char *data,
-                        uint64_t off,
+                        __unused uint64_t off,
                         size_t size) {
     if (size) {
         log_info("%s: %s\n", key, data);
@@ -50,7 +50,7 @@ static int iterate_post(void *info_cls,
     return MHD_YES;
 }
 
-static int iterate_get(void *cls, enum MHD_ValueKind kind, const char *key, const char *value) {
+static int iterate_get(void *cls, __unused enum MHD_ValueKind kind, const char *key, const char *value) {
     if (key && value) {
         log_info("%s: %s\n", key, value);
         struct connection_info *info = cls;
@@ -59,7 +59,7 @@ static int iterate_get(void *cls, enum MHD_ValueKind kind, const char *key, cons
     return MHD_YES;
 }
 
-static int iterate_header(void *cls, enum MHD_ValueKind kind, const char *key, const char *value) {
+static int iterate_header(void *cls, __unused enum MHD_ValueKind kind, const char *key, const char *value) {
     if (key && value) {
         log_info("%s: %s\n", key, value);
         struct connection_info *info = cls;
@@ -77,10 +77,10 @@ static int iterate_header(void *cls, enum MHD_ValueKind kind, const char *key, c
  * @params con_cls:
  * @params toe:
  */
-static void on_handle_complete(void *cls,
-                               struct MHD_Connection *connection,
+static void on_handle_complete(__unused void *cls,
+                               __unused struct MHD_Connection *connection,
                                void **con_cls,
-                               enum MHD_RequestTerminationCode toe) {
+                               __unused enum MHD_RequestTerminationCode toe) {
     struct connection_info *con_info = *con_cls;
     if (con_info) {
         if (con_info->connection_type == POST) MHD_destroy_post_processor(con_info->post_processor);
@@ -96,7 +96,7 @@ static void on_handle_complete(void *cls,
 static ssize_t file_reader(void *cls, uint64_t pos, char *buf, size_t max) {
     FILE *file = cls;
 
-    (void) fseek(file, pos, SEEK_SET);
+    (void) fseek(file, (long) pos, SEEK_SET);
     return fread(buf, 1, max, file);
 }
 
@@ -105,7 +105,7 @@ static void file_free_callback(void *cls) {
     fclose(file);
 }
 
-static int on_handle_connection(void *cls,
+static int on_handle_connection(__unused void *cls,
                                 struct MHD_Connection *connection,
                                 const char *url,
                                 const char *method,
@@ -150,9 +150,9 @@ static int on_handle_connection(void *cls,
         struct stat buf;
 
         char *current_dir = get_current_dir();
-        char *path = malloc(strlen(current_dir) + strlen(PORTFOLIO_PATH) + strlen(url) + 1);
+        char *path = malloc(strlen(current_dir) + strlen(RES_PATH) + strlen(url) + 1);
         strcpy(path, current_dir);
-        strcat(path, PORTFOLIO_PATH);
+        strcat(path, RES_PATH);
         strcat(path, url);
 
         if ((0 == stat(path, &buf)) && (S_ISREG (buf.st_mode))) {
@@ -220,15 +220,15 @@ int main() {
     // start micro HTTP daemon (MHD). when a request coming, we will handle it in #on_handle_connection
     struct MHD_Daemon *daemon;
 
-    unsigned int flag/*;
+    unsigned int flag;
     if (MHD_is_feature_supported(MHD_FEATURE_EPOLL))
         flag = MHD_USE_EPOLL_INTERNALLY_LINUX_ONLY;
     else if (MHD_is_feature_supported(MHD_FEATURE_POLL))
         flag = MHD_USE_POLL_INTERNALLY;
     else
-        flag*/ = MHD_USE_SELECT_INTERNALLY;
+        flag = MHD_USE_SELECT_INTERNALLY;
 
-    int port;
+    uint16_t port;
 #ifdef NDEBUG
     port = PORT;
 #else

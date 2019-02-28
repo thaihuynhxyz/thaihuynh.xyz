@@ -5,7 +5,7 @@
 #include "URLRouter.h"
 
 #define API "/"
-#define ABOUT "/res/index.html"
+#define HOME "/res/index.html"
 
 struct http_result *Api_handle_get() {
     log_info("func %s - conn", __func__);
@@ -15,9 +15,9 @@ struct http_result *Api_handle_get() {
     size_t size = 0;
 
     char *current_dir = get_current_dir();
-    char *path = malloc(strlen(current_dir) + strlen(ABOUT) + 1);
+    char *path = malloc(strlen(current_dir) + strlen(HOME) + 1);
     strcpy(path, current_dir);
-    strcat(path, ABOUT);
+    strcat(path, HOME);
 
     /* Open your_file in read-only mode */
     FILE *fp = fopen(path, "r");
