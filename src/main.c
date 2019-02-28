@@ -34,13 +34,13 @@ static void exit_nicely(struct MHD_Daemon *daemon) {
  * @params size: size of data
  */
 static int iterate_post(void *info_cls,
-                        __unused enum MHD_ValueKind kind,
+                        enum MHD_ValueKind kind,
                         const char *key,
-                        __unused const char *filename,
-                        __unused const char *content_type,
-                        __unused const char *transfer_encoding,
+                        const char *filename,
+                        const char *content_type,
+                        const char *transfer_encoding,
                         const char *data,
-                        __unused uint64_t off,
+                        uint64_t off,
                         size_t size) {
     if (size) {
         log_info("%s: %s\n", key, data);
@@ -50,7 +50,7 @@ static int iterate_post(void *info_cls,
     return MHD_YES;
 }
 
-static int iterate_get(void *cls, __unused enum MHD_ValueKind kind, const char *key, const char *value) {
+static int iterate_get(void *cls, enum MHD_ValueKind kind, const char *key, const char *value) {
     if (key && value) {
         log_info("%s: %s\n", key, value);
         struct connection_info *info = cls;
@@ -59,7 +59,7 @@ static int iterate_get(void *cls, __unused enum MHD_ValueKind kind, const char *
     return MHD_YES;
 }
 
-static int iterate_header(void *cls, __unused enum MHD_ValueKind kind, const char *key, const char *value) {
+static int iterate_header(void *cls, enum MHD_ValueKind kind, const char *key, const char *value) {
     if (key && value) {
         log_info("%s: %s\n", key, value);
         struct connection_info *info = cls;
@@ -77,10 +77,10 @@ static int iterate_header(void *cls, __unused enum MHD_ValueKind kind, const cha
  * @params con_cls:
  * @params toe:
  */
-static void on_handle_complete(__unused void *cls,
-                               __unused struct MHD_Connection *connection,
+static void on_handle_complete(void *cls,
+                               struct MHD_Connection *connection,
                                void **con_cls,
-                               __unused enum MHD_RequestTerminationCode toe) {
+                               enum MHD_RequestTerminationCode toe) {
     struct connection_info *con_info = *con_cls;
     if (con_info) {
         if (con_info->connection_type == POST) MHD_destroy_post_processor(con_info->post_processor);
@@ -105,7 +105,7 @@ static void file_free_callback(void *cls) {
     fclose(file);
 }
 
-static int on_handle_connection(__unused void *cls,
+static int on_handle_connection(void *cls,
                                 struct MHD_Connection *connection,
                                 const char *url,
                                 const char *method,
