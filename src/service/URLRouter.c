@@ -49,7 +49,7 @@ struct http_result *Api_handle(struct connection_info *info) {
 
     struct http_result *result = malloc(sizeof(struct http_result));
     result->http_code = MHD_HTTP_METHOD_NOT_ALLOWED;
-    result->message = "method not supported";
+    result->message = strdup("method not supported");
     return result;
 }
 
@@ -76,6 +76,6 @@ struct http_result *URLRouter_route(URLRouter *self, const char *url, struct con
 
     struct http_result *result = malloc(sizeof(struct http_result));
     result->http_code = MHD_HTTP_FORBIDDEN;
-    result->message = "Forbidden";
+    result->message = strdup("Forbidden");
     return result;
 }

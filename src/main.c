@@ -85,8 +85,18 @@ static void on_handle_complete(void *cls,
     if (con_info) {
         if (con_info->connection_type == POST) MHD_destroy_post_processor(con_info->post_processor);
         if (con_info->params) HMap_destroy(con_info->params);
-        if (con_info->body) free(con_info->body);
-        if (con_info->result) free(con_info->result);
+        if (con_info->body) {
+            free(con_info->body);
+            con_info->body = NULL;
+        }
+        if (con_info->result) {
+            if (con_info->result->message) {
+                free(con_info->result->message);
+                con_info->result->message = NULL;
+            }
+            free(con_info->result);
+            con_info->result = NULL;
+        }
         free(con_info);
 
         *con_cls = NULL;

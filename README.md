@@ -26,6 +26,7 @@
 * Dependencies
 
     [GNU Libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
+    
     [CMake](https://cmake.org/)
     
         sudo apt-get install cmake libmicrohttpd-dev
@@ -34,6 +35,7 @@
 * How to run tests
 
     docker run -p 80:8080 -t thaihuynhxyz/thaihuynh_xyz
+
     http://localhost:8080
 
 * Deployment instructions
