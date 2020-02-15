@@ -3,7 +3,7 @@
 ### Peronal website ###
 
 * Implement personal website by [GNU Libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
-* Version 1.1.0
+* Version 1.2.0
 
 ### Set up ###
 

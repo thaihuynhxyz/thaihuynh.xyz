@@ -11,7 +11,7 @@
 #include "model/connection_info.h"
 #include "service/URLRouter.h"
 
-#define PORT 80
+#define PORT 8080
 #define POST_BUFFER_SIZE  1024
 #define SITE_PATH "/blog/_site"
 
@@ -233,11 +233,7 @@ int main() {
     const unsigned int flag = MHD_USE_SELECT_INTERNALLY;
 
     uint16_t port;
-#ifdef NDEBUG
     port = PORT;
-#else
-    port = 8080;
-#endif
     log_info("start on port: %d\n", port);
 
     daemon = MHD_start_daemon(flag, port, NULL, NULL, &on_handle_connection, NULL,
