@@ -13,7 +13,7 @@
 
 #define PORT 80
 #define POST_BUFFER_SIZE  1024
-#define RES_PATH "/res"
+#define SITE_PATH "/blog/_site"
 
 URLRouter *router;
 
@@ -160,9 +160,9 @@ static int on_handle_connection(void *cls,
         struct stat buf;
 
         char *current_dir = get_current_dir();
-        char *path = malloc(strlen(current_dir) + strlen(RES_PATH) + strlen(url) + 1);
+        char *path = malloc(strlen(current_dir) + strlen(SITE_PATH) + strlen(url) + 1);
         strcpy(path, current_dir);
-        strcat(path, RES_PATH);
+        strcat(path, SITE_PATH);
         strcat(path, url);
 
         if ((0 == stat(path, &buf)) && (S_ISREG (buf.st_mode))) {

@@ -5,7 +5,7 @@
 #include "URLRouter.h"
 
 #define API "/"
-#define HOME "/res/index.html"
+#define HOME "/blog/_site/index.html"
 
 struct http_result *Api_handle_get() {
     log_info("func %s - conn", __func__);

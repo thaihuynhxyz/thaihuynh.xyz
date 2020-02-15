@@ -18,7 +18,7 @@ aux_source_directory(src/service/ SERVICE_SOURCE_FILES)
 # link resource
 add_custom_target(
         ${PROJECT_NAME}_res ALL
-        ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/res ${CMAKE_BINARY_DIR}/res
+        ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/blog ${CMAKE_BINARY_DIR}/blog
         SOURCES ${${PROJECT_NAME}_res}
 )
 
