@@ -238,7 +238,7 @@ int main() {
 #else
     port = 8080;
 #endif
-    log_info("start on port: %d\n", port);
+    log_info("start on: http://localhost:%d\n", port);
 
     daemon = MHD_start_daemon(flag, port, NULL, NULL, &on_handle_connection, NULL,
                               MHD_OPTION_NOTIFY_COMPLETED, on_handle_complete, NULL, MHD_OPTION_END);
