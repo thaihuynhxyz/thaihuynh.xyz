@@ -31,3 +31,7 @@
 .idea/
 cmake-build-debug/
 build/
+/blog/.jekyll-cache/
+/cert.pem
+/privkey.pem
+/fullchain.pem

@@ -3,7 +3,7 @@
 ### Peronal website ###
 
 * Implement personal website by [GNU Libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
-* Version 1.2.4
+* Version 1.2.6
 
 ### Set up ###
 
@@ -34,7 +34,7 @@
 * Database configuration
 * How to run tests
 
-    docker run -p 80:8080 -t thaihuynhxyz/thaihuynh_xyz
+    docker run -p 80:8080 -t thaihuynhxyz/thaihuynh_xyz:v1.2.4
 
     http://localhost:8080
 

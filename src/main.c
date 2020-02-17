@@ -1,5 +1,4 @@
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <microhttpd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -11,7 +10,10 @@
 #include "model/connection_info.h"
 #include "service/URLRouter.h"
 
-#define PORT 80
+#define PORT 443
+#define SERVERKEYFILE "privkey.pem"
+#define SERVERCERTFILE "fullchain.pem"
+
 #define POST_BUFFER_SIZE  1024
 #define SITE_PATH "/blog/_site"
 
@@ -42,6 +44,11 @@ static int iterate_post(void *info_cls,
                         const char *data,
                         uint64_t off,
                         size_t size) {
+    (void) kind;                 /* Unused. Silent compiler warning. */
+    (void) filename;             /* Unused. Silent compiler warning. */
+    (void) content_type;         /* Unused. Silent compiler warning. */
+    (void) transfer_encoding;    /* Unused. Silent compiler warning. */
+    (void) off;                  /* Unused. Silent compiler warning. */
     if (size) {
         log_info("%s: %s\n", key, data);
         struct connection_info *info = info_cls;
@@ -51,6 +58,7 @@ static int iterate_post(void *info_cls,
 }
 
 static int iterate_get(void *cls, enum MHD_ValueKind kind, const char *key, const char *value) {
+    (void) kind;                 /* Unused. Silent compiler warning. */
     if (key && value) {
         log_info("%s: %s\n", key, value);
         struct connection_info *info = cls;
@@ -60,6 +68,8 @@ static int iterate_get(void *cls, enum MHD_ValueKind kind, const char *key, cons
 }
 
 static int iterate_header(void *cls, enum MHD_ValueKind kind, const char *key, const char *value) {
+    (void) kind;               /* Unused. Silent compiler warning. */
+
     if (key && value) {
         log_info("%s: %s\n", key, value);
         struct connection_info *info = cls;
@@ -81,6 +91,9 @@ static void on_handle_complete(void *cls,
                                struct MHD_Connection *connection,
                                void **con_cls,
                                enum MHD_RequestTerminationCode toe) {
+    (void) cls;               /* Unused. Silent compiler warning. */
+    (void) connection;        /* Unused. Silent compiler warning. */
+    (void) toe;               /* Unused. Silent compiler warning. */
     struct connection_info *con_info = *con_cls;
     if (con_info) {
         if (con_info->connection_type == POST) MHD_destroy_post_processor(con_info->post_processor);
@@ -115,6 +128,50 @@ static void file_free_callback(void *cls) {
     fclose(file);
 }
 
+static long get_file_size(const char *filename) {
+    FILE *fp;
+
+    fp = fopen(filename, "rb");
+    if (fp) {
+        long size;
+
+        if ((0 != fseek(fp, 0, SEEK_END)) || (-1 == (size = ftell(fp)))) size = 0;
+
+        fclose(fp);
+
+        return size;
+    } else {
+        return 0;
+    }
+}
+
+static char *load_file(const char *filename) {
+    FILE *fp;
+    char *buffer;
+    long size;
+
+    size = get_file_size(filename);
+    if (0 == size) return NULL;
+
+    fp = fopen(filename, "rb");
+    if (!fp) return NULL;
+
+    buffer = malloc(size + 1);
+    if (!buffer) {
+        fclose(fp);
+        return NULL;
+    }
+    buffer[size] = '\0';
+
+    if (size != (long) fread(buffer, 1, size, fp)) {
+        free(buffer);
+        buffer = NULL;
+    }
+
+    fclose(fp);
+    return buffer;
+}
+
 static int on_handle_connection(void *cls,
                                 struct MHD_Connection *connection,
                                 const char *url,
@@ -124,6 +181,9 @@ static int on_handle_connection(void *cls,
                                 size_t *upload_data_size,
                                 void **con_cls) {
     log_info ("New %s request for %s using version %s\n", method, url, version);
+
+    (void) cls;               /* Unused. Silent compiler warning. */
+
     struct connection_info *con_info;
 
     int ret;
@@ -131,7 +191,7 @@ static int on_handle_connection(void *cls,
 
     if (!*con_cls) {
         con_info = malloc(sizeof(struct connection_info));
-        check_mem(con_info);
+        check_mem(con_info)
         con_info->params = HMap_create(NULL, NULL);
         if (!strcmp(method, MHD_HTTP_METHOD_POST)) {  // init #iterate_post func for params analysis
             con_info->connection_type = POST;
@@ -165,7 +225,7 @@ static int on_handle_connection(void *cls,
         strcat(path, SITE_PATH);
         strcat(path, url);
 
-        if ((0 == stat(path, &buf)) && (S_ISREG (buf.st_mode))) {
+        if ((0 == stat(path, &buf)) && (S_ISREG (buf.st_mode))) { // NOLINT(hicpp-signed-bitwise)
             file = fopen(path, "rb");
         } else {
             file = NULL;
@@ -229,8 +289,20 @@ static int on_handle_connection(void *cls,
 int main() {
     // start micro HTTP daemon (MHD). when a request coming, we will handle it in #on_handle_connection
     struct MHD_Daemon *daemon;
+    char *key_pem;
+    char *cert_pem;
 
-    const unsigned int flag = MHD_USE_SELECT_INTERNALLY;
+    key_pem = load_file(SERVERKEYFILE);
+    cert_pem = load_file(SERVERCERTFILE);
+
+    if ((key_pem == NULL) || (cert_pem == NULL)) {
+        printf("The key/certificate files could not be read.\n");
+        if (NULL != key_pem)
+            free(key_pem);
+        if (NULL != cert_pem)
+            free(cert_pem);
+        return 1;
+    }
 
     uint16_t port;
 #ifdef NDEBUG
@@ -238,11 +310,15 @@ int main() {
 #else
     port = 8080;
 #endif
-    log_info("start on: http://localhost:%d\n", port);
+    log_info("start on: https://localhost:%d\n", port);
 
-    daemon = MHD_start_daemon(flag, port, NULL, NULL, &on_handle_connection, NULL,
-                              MHD_OPTION_NOTIFY_COMPLETED, on_handle_complete, NULL, MHD_OPTION_END);
-    check_mem(daemon);
+    daemon = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_TLS, port, NULL, // NOLINT(hicpp-signed-bitwise)
+                              NULL, &on_handle_connection, NULL,
+                              MHD_OPTION_NOTIFY_COMPLETED, on_handle_complete, NULL,
+                              MHD_OPTION_HTTPS_MEM_KEY, key_pem,
+                              MHD_OPTION_HTTPS_MEM_CERT, cert_pem,
+                              MHD_OPTION_END);
+    check_mem(daemon)
 
     // router direct url to services
     router = URLRouter_create();
@@ -251,6 +327,8 @@ int main() {
     while (getchar() != 'q');
 
     error:
+    free(key_pem);
+    free(cert_pem);
     exit_nicely(daemon);
     return 0;
 }
