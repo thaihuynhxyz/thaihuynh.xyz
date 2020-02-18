@@ -1,4 +1,4 @@
-# [thaihuynh.xyz](http://thaihuynh.xyz/about.html)
+# [thaihuynh.xyz](https//thaihuynh.xyz/about.html)
 
 ### Peronal website ###
 
