@@ -29,7 +29,6 @@ github_username:  jekyll
 
 # Build settings
 destination: ../docs
-theme: jekyll-theme-console
 plugins:
   - jekyll-feed
 
