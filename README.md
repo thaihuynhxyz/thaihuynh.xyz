@@ -1,4 +1,4 @@
-# [thaihuynh.xyz](https//thaihuynh.xyz/about.html)
+# [thaihuynh.xyz](https://thaihuynh.xyz)
 
 ### Peronal website ###
 
@@ -15,6 +15,10 @@
             $ cd thaihuynh.xyz
     
 * Configuration
+
+    Build web pages by [jekyll](https://thaihuynh.xyz/jekyll/update/2020/02/15/welcome-to-jekyll.html)
+    
+        jekyll build -b "" -d ../blog
 
     Build by [CMake](https://cmake.org/)
     

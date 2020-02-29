@@ -23,7 +23,6 @@ email: thaihuynhxyz@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   thaihuynh.xyz blog
 baseurl: "/thaihuynh.xyz" # the subpath of your site, e.g. /blog
-url: "https://thaihuynhxyz.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: thaihuynhxyz
 github_username:  thaihuynhxyz
 
@@ -34,7 +33,7 @@ header_pages:
 
 style: dark
 
-footer: 'follow me on <a href="https://github.com/thaihuynhxyz/">github</a>'
+footer: 'follow me on <a href="https://github.com/thaihuynhxyz/thaihuynh.xyz">github</a>'
 
 # Build settings
 markdown: kramdown

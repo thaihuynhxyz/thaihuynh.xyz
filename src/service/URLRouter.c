@@ -7,9 +7,9 @@
 #define API "/"
 #define API_ABOUT "/about/"
 #define API_CONTACT "/contact/"
-#define PAGE_HOME "/blog/_site/index.html"
-#define PAGE_ABOUT "/blog/_site/about/index.html"
-#define PAGE_CONTACT "/blog/_site/contact/index.html"
+#define PAGE_HOME "/blog/index.html"
+#define PAGE_ABOUT "/blog/about/index.html"
+#define PAGE_CONTACT "/blog/contact/index.html"
 
 struct http_result *Api_handle_get() {
     log_info("func %s - conn", __func__);

@@ -15,7 +15,7 @@
 #define SERVERCERTFILE "fullchain.pem"
 
 #define POST_BUFFER_SIZE  1024
-#define SITE_PATH "/blog/_site"
+#define SITE_PATH "/blog"
 
 URLRouter *router;
 
