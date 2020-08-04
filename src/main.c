@@ -145,6 +145,8 @@ static long get_file_size(const char *filename) {
     }
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "DanglingPointers"
 static char *load_file(const char *filename) {
     FILE *fp;
     char *buffer;
@@ -171,6 +173,7 @@ static char *load_file(const char *filename) {
     fclose(fp);
     return buffer;
 }
+#pragma clang diagnostic pop
 
 static int on_handle_connection(void *cls,
                                 struct MHD_Connection *connection,

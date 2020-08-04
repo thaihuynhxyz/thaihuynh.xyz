@@ -3,7 +3,7 @@
 ### Peronal website ###
 
 * Implement personal website by [GNU Libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
-* Version 1.2.6
+* Version 1.2.10
 
 ### Set up ###
 
@@ -45,6 +45,10 @@
 * Deployment instructions
 
     docker build -t thaihuynh_xyz .
+    
+    docker tag thaihuynh_xyz:latest [HOSTNAME]/[PROJECT-ID]/[IMAGE]
+    
+    docker push [HOSTNAME]/[PROJECT-ID]/[IMAGE]
 
 ### Contribution guidelines ###
 
